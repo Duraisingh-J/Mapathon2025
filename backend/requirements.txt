@@ -1,0 +1,10 @@
+rasterio 
+geopandas
+shapely
+numpy
+pandas
+pyproj
+fiona
+fastapi
+uvicorn
+scikit-image
