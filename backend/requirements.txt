@@ -8,3 +8,4 @@ fiona
 fastapi
 uvicorn
 scikit-image
+python-multipart
