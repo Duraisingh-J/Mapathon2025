@@ -9,8 +9,4 @@ export default defineConfig({
     tailwindcss(),
   ],
   base: "/Mapathon2026/",
-  build: {
-    outDir: "../docs",
-    emptyOutDir: true,
-  }
 })

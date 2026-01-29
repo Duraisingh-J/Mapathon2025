@@ -248,51 +248,45 @@ export default function Dashboard() {
 
                         {/* Trend Chart */}
                         {Array.isArray(result) && result.length > 0 && (
-                            <div id="trend-chart" className="glass-panel p-6 rounded-lg">
-                                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-800 pb-2">
-                                    {result.length > 1 ? "Temporal Analysis" : "Analysis Overview"}
-                                </h4>
-                                {/* Explicit height container for ResponsiveContainer */}
-                                <div className="w-full h-[350px]">
-                                    <ResponsiveContainer width="100%" height={350}>
-                                        <LineChart data={result} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                                            <XAxis
-                                                dataKey="date"
-                                                stroke="#64748b"
-                                                tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
-                                                tickLine={false}
-                                                axisLine={false}
-                                                dy={10}
-                                            />
-                                            <YAxis
-                                                yAxisId="left"
-                                                stroke="#06b6d4"
-                                                tick={{ fill: '#06b6d4', fontSize: 10, fontFamily: 'monospace' }}
-                                                tickLine={false}
-                                                axisLine={false}
-                                                label={{ value: 'AREA (Ha)', angle: -90, position: 'insideLeft', fill: '#06b6d4', fontSize: 10, dy: 40 }}
-                                            />
-                                            <YAxis
-                                                yAxisId="right"
-                                                orientation="right"
-                                                stroke="#10b981"
-                                                tick={{ fill: '#10b981', fontSize: 10, fontFamily: 'monospace' }}
-                                                tickLine={false}
-                                                axisLine={false}
-                                                label={{ value: 'VOLUME (TMC)', angle: 90, position: 'insideRight', fill: '#10b981', fontSize: 10, dy: 40 }}
-                                            />
-                                            <Tooltip
-                                                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '4px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' }}
-                                                itemStyle={{ color: '#e2e8f0', fontSize: '12px', fontFamily: 'monospace' }}
-                                                labelStyle={{ color: '#94a3b8', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase' }}
-                                                cursor={{ stroke: '#334155', strokeWidth: 1 }}
-                                            />
-                                            <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} iconType="circle" />
-                                            <Line yAxisId="left" type="monotone" dataKey="area_ha" stroke="#06b6d4" name="Water Spread Area" strokeWidth={2} dot={{ r: 3, fill: '#06b6d4', strokeWidth: 0 }} activeDot={{ r: 5, fill: '#fff' }} />
-                                            <Line yAxisId="right" type="monotone" dataKey="volume_tmc" stroke="#10b981" name="Volume Capacity" strokeWidth={2} dot={{ r: 3, fill: '#10b981', strokeWidth: 0 }} activeDot={{ r: 5, fill: '#fff' }} />
-                                        </LineChart>
-                                    </ResponsiveContainer>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Chart 1: Area */}
+                                <div id="area-chart" className="glass-panel p-6 rounded-lg">
+                                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-800 pb-2 flex justify-between items-center">
+                                        <span>Spread Area vs Date</span>
+                                        <span className="text-[10px] text-cyan-500 bg-cyan-900/20 px-2 py-1 rounded">Visual Metric</span>
+                                    </h4>
+                                    <div className="w-full h-[300px]">
+                                        <ResponsiveContainer width="100%" height={300}>
+                                            <LineChart data={result} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                                <XAxis dataKey="date" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10 }} tickLine={false} axisLine={false} dy={10} />
+                                                <YAxis stroke="#06b6d4" tick={{ fill: '#06b6d4', fontSize: 10 }} tickLine={false} axisLine={false} label={{ value: 'Ha', angle: -90, position: 'insideLeft', fill: '#06b6d4', fontSize: 10 }} />
+                                                <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#06b6d4', borderRadius: '4px' }} itemStyle={{ color: '#fff' }} />
+                                                <Legend />
+                                                <Line type="monotone" dataKey="area_ha" stroke="#06b6d4" name="Area (Ha)" strokeWidth={3} dot={{ r: 4, fill: '#06b6d4' }} activeDot={{ r: 6 }} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+
+                                {/* Chart 2: Volume */}
+                                <div id="volume-chart" className="glass-panel p-6 rounded-lg">
+                                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-800 pb-2 flex justify-between items-center">
+                                        <span>Volume vs Date</span>
+                                        <span className="text-[10px] text-emerald-500 bg-emerald-900/20 px-2 py-1 rounded">Hydrologic Metric</span>
+                                    </h4>
+                                    <div className="w-full h-[300px]">
+                                        <ResponsiveContainer width="100%" height={300}>
+                                            <LineChart data={result} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                                <XAxis dataKey="date" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10 }} tickLine={false} axisLine={false} dy={10} />
+                                                <YAxis stroke="#10b981" tick={{ fill: '#10b981', fontSize: 10 }} tickLine={false} axisLine={false} label={{ value: 'TMC', angle: -90, position: 'insideLeft', fill: '#10b981', fontSize: 10 }} />
+                                                <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#10b981', borderRadius: '4px' }} itemStyle={{ color: '#fff' }} />
+                                                <Legend />
+                                                <Line type="monotone" dataKey="volume_tmc" stroke="#10b981" name="Volume (TMC)" strokeWidth={3} dot={{ r: 4, fill: '#10b981' }} activeDot={{ r: 6 }} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    </div>
                                 </div>
                             </div>
                         )}
