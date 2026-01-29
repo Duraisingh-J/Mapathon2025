@@ -340,9 +340,31 @@ def process_water_from_image(image_path, lake_id, date_str, output_dir):
         # -----------------------------
         cloud_mask = apply_s2cloudless_mask(data)
 
+        # -----------------------------
+        # DYNAMIC BAND SELECTION
+        # -----------------------------
+        num_bands = data.shape[0]
+        print(f"[DEBUG] Input has {num_bands} bands.")
+        
+        if num_bands >= 12:
+            # Full Sentinel-2 (L1C/L2A usually 13 bands)
+            # Band 3 = Green (Index 2)
+            # Band 8 = NIR (Index 7)
+            green_idx = 2
+            nir_idx = 7
+            print("[DEBUG] Using Full Sentinel-2 Mapping: Green=B3(idx 2), NIR=B8(idx 7)")
+        else:
+            # 4-Band Subset (export default)
+            # [Blue, Green, Red, NIR]
+            # Green = Index 1
+            # NIR = Index 3
+            green_idx = 1
+            nir_idx = 3
+            print(f"[DEBUG] Using Subset Mapping: Green=idx {green_idx}, NIR=idx {nir_idx}")
+
         # Bands
-        green = data[GREEN_BAND - 1]
-        nir   = data[NIR_BAND - 1]
+        green = data[green_idx]
+        nir   = data[nir_idx]
         
         # Apply mask
         green = np.where(cloud_mask, np.nan, green)

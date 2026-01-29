@@ -306,19 +306,21 @@ export default function Dashboard() {
 
                                     <div className="space-y-3">
                                         <ResultCard title="Spread" value={res.area_ha} unit="Ha" icon={AreaIcon} color="cyan" />
-                                        <ResultCard title="Volume" value={res.volume_tmc} unit="TMC" icon={VolumeIcon} color="emerald" />
+
+                                        {/* User Request: Show ONLY Base Level Volume if provided */}
+                                        <ResultCard
+                                            title={res.base_level ? `Volume @ ${res.base_level}m` : "Volume"}
+                                            value={res.base_level ? res.volume_at_level_tmc : res.volume_tmc}
+                                            unit="TMC"
+                                            icon={VolumeIcon}
+                                            color="emerald"
+                                        />
+
                                         {res.water_level && (
                                             <div className="text-right -mt-2 mb-2 mr-2">
-                                                <span className="text-[10px] text-slate-500 font-mono">Level: {res.water_level}m</span>
-                                            </div>
-                                        )}
-
-                                        {res.base_level && (
-                                            <div className="mt-3 pt-3 border-t border-slate-800">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-[10px] uppercase text-indigo-400 font-bold">@ {res.base_level}m</span>
-                                                    <span className="text-sm font-mono text-white font-bold">{res.volume_at_level_tmc} TMC</span>
-                                                </div>
+                                                <span className="text-[10px] text-slate-500 font-mono">
+                                                    Detected Level: {res.water_level}m
+                                                </span>
                                             </div>
                                         )}
                                     </div>
