@@ -1,18 +1,19 @@
-import shutil
 import os
 import uuid
-from datetime import date
-from fastapi import FastAPI, UploadFile, File
+import shutil
+from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from . import pipeline
+from typing import List
+from datetime import datetime
+
+# IMPORTANT: correct import
+from backend import pipeline   # ← FIXED
 
 app = FastAPI()
 
-@app.get("/")
-def home():
-    return {"message": "Lake Analysis API is running"}
-
-# Add CORS
+# -----------------------------
+# CORS
+# -----------------------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,78 +22,85 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Directory Setup
+# -----------------------------
+# Paths
+# -----------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
 
+from fastapi.staticfiles import StaticFiles
+
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-from fastapi import FastAPI, UploadFile, File, Form
+# Mount Output directory to serve images
+app.mount("/outputs", StaticFiles(directory=OUTPUT_DIR), name="outputs")
 
-# ... (imports)
+# -----------------------------
+# Health check
+# -----------------------------
+@app.get("/")
+def home():
+    return {"message": "Lake Analysis API is running"}
 
-from typing import List
-
+# -----------------------------
+# Main API
+# -----------------------------
 @app.post("/analyze")
 async def analyze(
-    satellite: List[UploadFile] = File(...), 
+    satellite: List[UploadFile] = File(...),
     dem: UploadFile = File(None),
     base_level: float = Form(None),
     dates: str = Form(None)
 ):
-    # Generate unique run ID
     run_id = str(uuid.uuid4())[:8]
-    
-    # Parse dates if provided
-    date_list = []
-    if dates:
-        # Expect comma or newline separated dates
-        date_list = [d.strip() for d in dates.replace("\n", ",").split(",") if d.strip()]
-    
-    # Save DEM if provided (optional) - ONE DEM for ALL images
-    dem_abs_path = None
+
+    # -----------------------------
+    # Save DEM (optional)
+    # -----------------------------
+    dem_path = None
     if dem:
         dem_ext = os.path.splitext(dem.filename)[1]
-        dem_filename = f"{run_id}_dem{dem_ext}"
-        dem_path = os.path.join(UPLOAD_DIR, dem_filename)
+        dem_path = os.path.join(UPLOAD_DIR, f"{run_id}_dem{dem_ext}")
         with open(dem_path, "wb") as f:
             shutil.copyfileobj(dem.file, f)
-        dem_abs_path = dem_path
-        print(f"[DEBUG] DEM saved to {dem_path}")
 
-    # Save all satellite images
+    # -----------------------------
+    # Save satellite images
+    # -----------------------------
     sat_paths = []
-    
-    for idx, sat_file in enumerate(satellite):
-        sat_ext = os.path.splitext(sat_file.filename)[1]
-        sat_filename = f"{run_id}_sat_{idx}{sat_ext}"
-        sat_path = os.path.join(UPLOAD_DIR, sat_filename)
-        
+    for idx, file in enumerate(satellite):
+        ext = os.path.splitext(file.filename)[1]
+        sat_path = os.path.join(UPLOAD_DIR, f"{run_id}_sat_{idx}{ext}")
         with open(sat_path, "wb") as f:
-            shutil.copyfileobj(sat_file.file, f)
-        
+            shutil.copyfileobj(file.file, f)
         sat_paths.append(sat_path)
-    
-    print(f"[DEBUG] Processing {len(sat_paths)} images with dates: {date_list}")
 
+    # -----------------------------
+    # Run pipeline
+    # -----------------------------
     try:
-        # Call Analysis Orchestrator ONCE with list of paths
-        # dates string is passed directly
         results = pipeline.analyze_lake(
             image_paths=sat_paths,
-            dem_path=dem_abs_path,
+            dem_path=dem_path,
             lake_id=run_id,
-            date_string=dates, # Pass original string or joined list
+            date_string=dates,
             output_dir=OUTPUT_DIR,
             base_level=base_level
         )
-        
-    except Exception as e:
-        print(f"[ERROR] Pipeline Analysis failed: {e}")
-        # Return a partial result or error structure that frontend can handle
-        return [{"error": str(e), "message": "Pipeline failed"}]
+        return results
 
-    print(f"[DEBUG] All processing done. Returning {len(results)} results.")
-    return results
+    except Exception as e:
+        return {
+            "error": str(e),
+            "message": "Analysis failed"
+        }
+
+
+# -----------------------------
+# ENTRY POINT
+# -----------------------------
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)

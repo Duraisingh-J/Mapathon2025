@@ -276,12 +276,21 @@ export default function Dashboard() {
                                         <ResponsiveContainer width="100%" height={300}>
                                             <LineChart data={result} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                                                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                                                <XAxis dataKey="date" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10 }} tickLine={false} axisLine={false} dy={10} />
+                                                <XAxis
+                                                    dataKey="filename"
+                                                    stroke="#64748b"
+                                                    tick={{ fill: '#64748b', fontSize: 10 }}
+                                                    tickLine={false}
+                                                    axisLine={false}
+                                                    dy={10}
+                                                    tickFormatter={(val) => val.length > 10 ? val.substring(0, 10) + '...' : val}
+                                                />
                                                 <YAxis stroke="#06b6d4" tick={{ fill: '#06b6d4', fontSize: 10 }} tickLine={false} axisLine={false} label={{ value: 'Ha', angle: -90, position: 'insideLeft', fill: '#06b6d4', fontSize: 10 }} />
                                                 <Tooltip
                                                     contentStyle={{ backgroundColor: '#0f172a', borderColor: '#06b6d4', borderRadius: '4px' }}
                                                     itemStyle={{ color: '#fff' }}
                                                     cursor={{ stroke: '#06b6d4', strokeWidth: 1 }}
+                                                    labelFormatter={(label, payload) => payload[0]?.payload?.date ? `${label} (${payload[0].payload.date})` : label}
                                                 />
                                                 <Legend />
                                                 <Line
@@ -309,7 +318,15 @@ export default function Dashboard() {
                                         <ResponsiveContainer width="100%" height={300}>
                                             <LineChart data={result} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                                                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                                                <XAxis dataKey="date" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10 }} tickLine={false} axisLine={false} dy={10} />
+                                                <XAxis
+                                                    dataKey="filename"
+                                                    stroke="#64748b"
+                                                    tick={{ fill: '#64748b', fontSize: 10 }}
+                                                    tickLine={false}
+                                                    axisLine={false}
+                                                    dy={10}
+                                                    tickFormatter={(val) => val.length > 10 ? val.substring(0, 10) + '...' : val}
+                                                />
                                                 <YAxis
                                                     type="number"
                                                     stroke="#10b981"
@@ -370,7 +387,15 @@ export default function Dashboard() {
                                     </div>
 
                                     <div className="space-y-3">
-                                        <ResultCard title="Spread" value={res.area_ha} unit="Ha" icon={AreaIcon} color="cyan" />
+                                        <ResultCard
+                                            title="Spread"
+                                            value={res.area_ha}
+                                            unit="Ha"
+                                            icon={AreaIcon}
+                                            color="cyan"
+                                            subText={res.pct_change != 0 ? `${res.pct_change > 0 ? "+" : ""}${res.pct_change}% vs Base` : (idx === 0 ? "Base Image" : "No Change")}
+                                            subColor={res.pct_change > 0 ? "text-emerald-400" : (res.pct_change < 0 ? "text-red-400" : "text-slate-500")}
+                                        />
 
                                         {/* User Request: Show ONLY Base Level Volume if provided */}
                                         <ResultCard
